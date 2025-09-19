@@ -140,4 +140,22 @@ app.get("/chats/:roomId", async (req , res)=>{
     }
 })
 
+app.get("/room/:slug", async (req , res)=>{
+    const slug = req.params.slug;
+    try{
+        const room = await prismaClient.room.findUnique({
+        where:{
+            slug,
+        }
+    })
+    return res.json({
+        room
+    })
+    } catch(e){
+        return res.json({
+            message: "something went wrong !"
+        })
+    }
+})
+
 app.listen(3001)
