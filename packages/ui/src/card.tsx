@@ -25,3 +25,9 @@ export function Card({
     </a>
   );
 }
+
+export function CardContent(){
+  return <div>
+    hii there
+  </div>
+}
