@@ -13,10 +13,12 @@ export const RoomCanvas = ({roomId}: {roomId :string})=>{
         const ws = new WebSocket(`${WS_URL}?token=${token}`);
         ws.onopen = ()=>{
             setSocket(ws);
-            ws.send(JSON.stringify({
+            const data = {
                 type: "join_room",
                 roomId,
-            }))
+            }
+            console.log(data);
+            ws.send(JSON.stringify(data))
         }
     },[])
     

@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 export default function SignUp(){
     const router = useRouter();
     return <div>
-        <AuthPage isSignin={true} onClick={()=>{
+        <AuthPage isSignin={false} onClick={()=>{
             router.push("/signup")
         }} ></AuthPage>
     </div>
