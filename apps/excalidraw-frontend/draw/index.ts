@@ -12,7 +12,7 @@ type Shape = {
     centerX : number;
     centerY : number;
     radius  : number;
-}
+} | null;
 
 export async function drawInit(canvas : HTMLCanvasElement, roomId : string, socket : WebSocket){
 
@@ -47,22 +47,47 @@ export async function drawInit(canvas : HTMLCanvasElement, roomId : string, sock
         clicked = false;
         const width = e.clientX - startX;
         const height = e.clientY - startY;
-        const shape : Shape = {
-            type : 'rect',
-            x : startX,
-            y : startY,
-            height,
-            width
+        const centerX = 0;
+        const centerY = 0;
+        const radius = 2;
+        let shape : Shape = null;
+        // @ts-expect-error
+        const selectedTool = window.selectedTool;
+        if (selectedTool === "rect"){
+            shape  = {
+                type : 'rect',
+                x : startX,
+                y : startY,
+                height,
+                width
+            }
+        // } else if (selectedTool === "circle"){
+        //     shape = {
+        //         type : "circle",
+        //         centerX,
+        //         centerY,
+        //         radius
+        //     }
         }
-        existingShapes.push(shape)
-         socket.send(JSON.stringify({
-                type: "chat",
-                message: JSON.stringify({
-                    shape
-                }),
-                roomId : parseInt(roomId),
-            })
-        );
+            existingShapes.push(shape)
+            socket.send(JSON.stringify({
+                    type: "chat",
+                    message: JSON.stringify({
+                        shape
+                    }),
+                    roomId : parseInt(roomId),
+                })
+            );
+        // @ts-ignore
+        if(window.selectedTool === "circle"){
+            const centerX = height;
+            const centerY = width;
+            const radius = height/2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.stroke();
+        }
     })
     canvas.addEventListener("mousemove", (e)=>{
         if(clicked){
@@ -70,8 +95,20 @@ export async function drawInit(canvas : HTMLCanvasElement, roomId : string, sock
             const height = e.clientY - startY;
             clearCanvas(existingShapes,canvas,ctx);
             ctx.strokeStyle = "rgba(255, 255, 255)";
+            //@ts-ignore
+            const selectedTool = window.selectedTool;
+            if(selectedTool === "rect"){
             ctx.strokeRect(startX, startY, width, height);
+            }else if(selectedTool === "circle"){
+                const centerX = startX + width / 2;
+                const centerY = startY + height / 2;
+                const radius = Math.max(height, width) / 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
         }
+        
     })
 }
 
