@@ -43,13 +43,14 @@ export async function drawInit(canvas : HTMLCanvasElement, roomId : string, sock
         startX = e.clientX;
         startY = e.clientY;
     })
+
     canvas.addEventListener("mouseup", (e)=>{
         clicked = false;
         const width = e.clientX - startX;
-        const height = e.clientY - startY;
-        const centerX = 0;
-        const centerY = 0;
-        const radius = 2;
+        const height = e.clientY - startY;  
+        const centerX = startX + height;
+        const centerY = startY + width;
+        const radius = Math.max(height, width) / 2;
         let shape : Shape = null;
         // @ts-expect-error
         const selectedTool = window.selectedTool;
@@ -61,13 +62,13 @@ export async function drawInit(canvas : HTMLCanvasElement, roomId : string, sock
                 height,
                 width
             }
-        // } else if (selectedTool === "circle"){
-        //     shape = {
-        //         type : "circle",
-        //         centerX,
-        //         centerY,
-        //         radius
-        //     }
+        } else if (selectedTool === "circle"){
+            shape = {
+                type : "circle",
+                centerX,
+                centerY,
+                radius
+            }
         }
             existingShapes.push(shape)
             socket.send(JSON.stringify({
@@ -78,17 +79,8 @@ export async function drawInit(canvas : HTMLCanvasElement, roomId : string, sock
                     roomId : parseInt(roomId),
                 })
             );
-        // @ts-ignore
-        if(window.selectedTool === "circle"){
-            const centerX = height;
-            const centerY = width;
-            const radius = height/2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.stroke();
-        }
     })
+
     canvas.addEventListener("mousemove", (e)=>{
         if(clicked){
             const width = e.clientX - startX;
@@ -118,9 +110,14 @@ function clearCanvas(existingShapes : Shape[], canvas : HTMLCanvasElement, ctx :
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
     existingShapes.map((shape)=>{
-        if(shape.type == "rect"){
+        if (shape && shape.type == "rect"){
             ctx.strokeStyle = "rgba(255, 255, 255)";
             ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+        } else if (shape && shape.type == "circle"){
+            ctx.strokeStyle = "rgba(255, 255, 255)";
+            ctx.beginPath();
+            ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, 2 * Math.PI);
+            ctx.stroke();
         }
     })
 }
